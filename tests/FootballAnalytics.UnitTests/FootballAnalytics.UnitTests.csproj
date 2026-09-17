@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FootballAnalytics.Domain\FootballAnalytics.Domain.csproj" />
+    <ProjectReference Include="..\..\src\FootballAnalytics.DatabaseMigrator\FootballAnalytics.DatabaseMigrator.csproj" />
   </ItemGroup>
 
 </Project>

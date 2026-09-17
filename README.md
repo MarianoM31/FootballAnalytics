@@ -33,8 +33,18 @@ dotnet run --project src/FootballAnalytics.Api
 
 La API expone `GET /health`, que responde `{"status":"healthy"}`. En desarrollo también publica el documento OpenAPI.
 
+## Base de datos local y migraciones
+
+El proyecto `FootballAnalytics.DatabaseMigrator` crea la base configurada y aplica los scripts pendientes de `database/migrations`.
+
+```powershell
+dotnet run --project src/FootballAnalytics.DatabaseMigrator
+```
+
+La configuración de desarrollo vive en `src/FootballAnalytics.DatabaseMigrator/appsettings.json`. En otra máquina, se puede reemplazar sin cambiar el código mediante la variable de entorno `ConnectionStrings__FootballAnalyticsDb`. Para más detalles, consulta [la guía de base de datos](docs/DATABASE.md).
+
 ## Estado actual
 
-Phase 0 está implementada: estructura de solución, modelo de dominio inicial, configuración sin secretos, endpoint de salud, pruebas y principios de datos. No hay proveedores deportivos, persistencia implementada, modelos predictivos ni dashboard todavía.
+Phase 0 está implementada: estructura de solución, modelo de dominio inicial, configuración sin secretos, endpoint de salud, migraciones SQL versionadas, pruebas y principios de datos. No hay proveedores deportivos, repositorios CRUD, modelos predictivos ni dashboard todavía.
 
 Consulta [la arquitectura](docs/ARCHITECTURE.md), [la hoja de ruta](docs/ROADMAP.md) y [los principios de datos](docs/DATA_PRINCIPLES.md).
