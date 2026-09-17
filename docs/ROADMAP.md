@@ -8,6 +8,10 @@ Solución, límites de capas, modelo base, endpoint de salud, pruebas y document
 
 Persistencia de competiciones, temporadas, equipos y próximos partidos; sincronización desacoplada de proveedores.
 
+### Phase 1A - Ingestion Core
+
+Completada: contratos neutrales de proveedor, modelos normalizados, sincronización idempotente con Dapper, auditoría de ejecuciones y proveedor falso exclusivamente para pruebas. La integración con un proveedor deportivo real sigue pendiente.
+
 ## Phase 2 - Match Statistics
 
 Resultados y estadísticas de partido, con procedencia y timestamps de ingesta.
