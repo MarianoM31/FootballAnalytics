@@ -31,3 +31,7 @@ El CLI limita la prueba inicial a los próximos 14 días y no expone un endpoint
 La migración `003_historical_match_foundation.sql` incorpora observaciones inmutables de programación y snapshots de estadísticas por equipo. `AvailableAtUtc` representa cuándo el proveedor hizo disponible una observación e `IngestedAtUtc` cuándo FootballAnalytics la obtuvo; si el proveedor no conoce disponibilidad, se debe usar el instante de ingesta de forma conservadora. Un cálculo con corte `T` solo puede usar observaciones para las que ambos timestamps sean menores o iguales a `T`.
 
 `ObservedAtUtc` es opcional y representa cuándo ocurrió el hecho subyacente cuando esa noción existe. No se almacenan payloads completos: se preservan datos normalizados, proveedor, referencia a la ejecución de ingesta y fingerprint. Un reintento de la misma observación no se duplica; una corrección del proveedor, al tener fingerprint diferente, crea un nuevo snapshot.
+
+## StatsBomb Open Data
+
+StatsBomb Open Data puede usarse como fuente histórica mediante `sync-statsbomb-history <competitionId> <seasonId>`. Los análisis o insights publicados derivados de estos datos deben acreditar a StatsBomb y emplear su logo conforme al [Media Pack oficial](https://statsbomb.com/media-pack/). La procedencia se preserva con `Provider = statsbomb-open`.
