@@ -12,6 +12,10 @@ Persistencia de competiciones, temporadas, equipos y próximos partidos; sincron
 
 Completada: contratos neutrales de proveedor, modelos normalizados, sincronización idempotente con Dapper, auditoría de ejecuciones y proveedor falso exclusivamente para pruebas. La integración con un proveedor deportivo real sigue pendiente.
 
+### Phase 1B - football-data.org provider
+
+En progreso: adaptador HTTP para Premier League (`PL`), configuración exclusiva mediante variable de entorno, CLI de sincronización manual y pruebas sin llamadas reales. La primera sincronización real requiere un token local configurado y autorización explícita.
+
 ## Phase 2 - Match Statistics
 
 Resultados y estadísticas de partido, con procedencia y timestamps de ingesta.
