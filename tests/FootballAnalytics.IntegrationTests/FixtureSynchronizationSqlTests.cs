@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 
 namespace FootballAnalytics.IntegrationTests;
 
+[Collection(SqlServerCollection.Name)]
 public sealed class FixtureSynchronizationSqlTests : IAsyncLifetime
 {
     private readonly string providerCode = $"phase1a-test-{Guid.NewGuid():N}";

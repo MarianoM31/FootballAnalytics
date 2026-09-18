@@ -9,3 +9,5 @@ Los identificadores de proveedores están modelados por `ProviderIdentifier`: el
 La API no accede directamente a SQL. La configuración de conexión se declara sin credenciales en `appsettings.json`; secretos y valores por entorno no se versionan.
 
 `FixtureSyncService` pertenece a Application: recibe `IFootballDataProvider`, procesa datos normalizados en el orden competición, temporada, equipos y fixture, y delega persistencia y auditoría en interfaces. Infrastructure implementa esos contratos mediante Dapper y una factoría de conexiones SQL Server. No existen endpoints públicos de sincronización todavía.
+
+La fundación histórica mantiene `Fixture` como proyección operativa actual. Las observaciones de programación y los snapshots de estadísticas son entidades inmutables: Infrastructure impide duplicados exactos mediante un fingerprint por fixture y proveedor, mientras que una corrección legítima usa un fingerprint distinto y genera otra observación.

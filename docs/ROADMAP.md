@@ -14,11 +14,15 @@ Completada: contratos neutrales de proveedor, modelos normalizados, sincronizaci
 
 ### Phase 1B - football-data.org provider
 
-En progreso: adaptador HTTP para Premier League (`PL`), configuración exclusiva mediante variable de entorno, CLI de sincronización manual y pruebas sin llamadas reales. La primera sincronización real requiere un token local configurado y autorización explícita.
+Completada: adaptador HTTP para Premier League (`PL`), configuración exclusiva mediante variable de entorno, CLI de sincronización manual, validación real idempotente y pruebas sin llamadas reales.
 
 ## Phase 2 - Match Statistics
 
 Resultados y estadísticas de partido, con procedencia y timestamps de ingesta.
+
+### Phase 2A - Historical & Temporal Match Foundation
+
+En progreso: observaciones inmutables de programación, snapshots de estadísticas por equipo, temporalidad as-of e integridad de persistencia. No incluye todavía proveedores estadísticos, features ni modelos predictivos.
 
 ## Phase 3 - Lineups
 
