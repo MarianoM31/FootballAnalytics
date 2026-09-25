@@ -1,18 +1,20 @@
 # Phase 3 discovery — competition and data coverage
 
-**Fecha de verificación:** 2026-09-25. Este documento es una evaluación de factibilidad, no una promesa de cobertura ni autorización para ingerir. No se hicieron solicitudes autenticadas, no se leyeron secretos y no se modificó SQL.
+**Fecha de revisión local:** 2026-09-25. Base: `develop`, HEAD `ca8bb039d3d9db5b2360e72d081aee277856ba3b`. Este documento es una evaluación de factibilidad, no una promesa de cobertura ni autorización para ingerir. Esta revisión no hizo llamadas a proveedores ni leyó secretos. Las sondas anteriores registradas abajo sí incluyeron solicitudes autenticadas.
+
+Se distinguen comportamiento verificado en código, observaciones anteriores registradas (no revalidadas ahora), afirmaciones documentales de proveedor y desconocidos. El plan vigente está en [PHASE3_EXPANSION_PLAN.md](PHASE3_EXPANSION_PLAN.md).
 
 ## Estado local observado
 
-El adaptador \`FootballDataProvider\` implementa \`IFootballDataProvider\`, pero fija la competición \`PL\` y el CLI sólo admite \`sync-fixtures PL\`. Normaliza competición, temporada, equipos, calendario, estado y marcador final; no deserializa estadísticas, árbitros ni alineaciones.
+El adaptador `FootballDataProvider` implementa `IFootballDataProvider`, pero fija la competición `PL` y el CLI sólo admite `sync-fixtures PL`. Expone sólo la temporada actual y normaliza competición, equipos, calendario, estado y marcador final nullable; no deserializa estadísticas, árbitros ni alineaciones.
 
-\`StatsBombOpenDataProvider\` recibe un par \`competition_id/season_id\`, descarga partidos y eventos públicos con concurrencia máxima 4. El calculador actual deriva goles, tiros, tiros a puerta, córners, offsides, faltas y amarillas/rojas. No persiste alineaciones ni árbitros. En la ingesta histórica, \`AvailableAtUtc\` se resuelve conservadoramente al instante de ingesta: no es evidencia de disponibilidad prepartido. El World Cup 2018 existente no fue tocado.
+`StatsBombOpenDataProvider` recibe un par `competition_id/season_id`, descarga partidos y eventos públicos con concurrencia máxima 4. El calculador actual deriva goles, tiros, tiros a puerta, córners, offsides, faltas y amarillas/rojas. No persiste alineaciones ni árbitros. En la ingesta histórica, `AvailableAtUtc` se resuelve conservadoramente al instante de ingesta: no es evidencia de disponibilidad prepartido. El World Cup 2018 existente no fue tocado.
 
 ## Método y evidencia
 
-Se consultaron de sólo lectura los [metadatos públicos de StatsBomb](https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json), el árbol público del repositorio y los ficheros de partidos indicados abajo. El [README de Open Data](https://github.com/statsbomb/open-data/blob/master/README.md) define: partidos por competición/temporada, y eventos y alineaciones por \`match_id\`.
+La discovery anterior registró consultas de sólo lectura a los [metadatos públicos de StatsBomb](https://raw.githubusercontent.com/statsbomb/open-data/master/data/competitions.json), el árbol público del repositorio y los ficheros de partidos indicados abajo. El [README de Open Data](https://github.com/statsbomb/open-data/blob/master/README.md) define: partidos por competición/temporada, y eventos y alineaciones por `match_id`.
 
-Los recuentos **verificados** son \`partidos / eventos / alineaciones\` presentes en una temporada pública. Un recuento parcial es una muestra: jamás debe presentarse como toda la competición.
+Los recuentos **registrados como verificados en la discovery anterior** son `partidos / eventos / alineaciones` presentes en una temporada pública. Un recuento parcial es una muestra: jamás debe presentarse como toda la competición.
 
 | Objetivo | Temporadas del catálogo Open Data | Ficheros verificados | Conclusión |
 |---|---|---|---|
@@ -23,22 +25,22 @@ Los recuentos **verificados** son \`partidos / eventos / alineaciones\` presente
 | Ligue 1 | 2015/16, 2021/22, 2022/23 (7, IDs variables) | 2022/23: **32 / 32 / 32** | Muestra parcial. |
 | Champions League | 1970/71–1972/73, 1999/00, 2003/04–2018/19 (16, IDs variables) | 2018/19: **1 / 1 / 1** | Catálogo amplio, muestra mínima. |
 | Europa League | 1988/89 (35/75) | **3 / 3 / 3** | Muestra histórica mínima. |
-| Conference League | Sin entrada | — | No disponible en el catálogo actual. |
+| Conference League | Sin entrada | — | Sin entrada en el catálogo observado. |
 | UEFA selecciones | Euro 2020 (55/43), Euro 2024 (55/282) | Euro 2024: **51 / 51 / 51** | Euro disponible; no se hallaron Nations League ni clasificatorias UEFA. |
-| Copa Libertadores | Sin entrada | — | No disponible. |
-| Copa Sudamericana | Sin entrada | — | No disponible. |
+| Copa Libertadores | Sin entrada | — | Sin entrada en el catálogo observado. |
+| Copa Sudamericana | Sin entrada | — | Sin entrada en el catálogo observado. |
 | Copa América | 2024 (223/282) | **32 / 32 / 32** | Torneo disponible. |
-| Eliminatorias CONMEBOL | Sin entrada | — | No disponible. |
+| Eliminatorias CONMEBOL | Sin entrada | — | Sin entrada en el catálogo observado. |
 
-La existencia de metadatos no prueba que haya todos los partidos ni datos actuales. Los campos \`match_available\` y \`match_updated\` no constituyen un SLA operativo.
+Ausencia en ese catálogo no prueba ausencia actual o global. La existencia de metadatos no prueba que haya todos los partidos ni datos actuales. Los campos `match_available` y `match_updated` no constituyen un SLA operativo.
 
 ## football-data.org: acceso real frente a documentación
 
-La [cobertura pública](https://www.football-data.org/coverage) enumera gratuitamente Premier League, Bundesliga, Ligue 1, Serie A, La Liga, Champions League y Euro, y lista Europa League, Conference League, Nations League y clasificatorias UEFA en su catálogo.
+Según la referencia documental previamente consultada, la [cobertura pública](https://www.football-data.org/coverage) enumera gratuitamente Premier League, Bundesliga, Ligue 1, Serie A, La Liga, Champions League y Euro, y lista Europa League, Conference League, Nations League y clasificatorias UEFA en su catálogo.
 
-Eso no identifica el plan del token ni prueba una respuesta autorizada. Por código y por validación previa del proyecto, el único soporte actual del adaptador es **Premier League**; cualquier competición adicional es **desconocida** hasta una sonda autenticada aprobada. Copa Libertadores, Sudamericana, América y eliminatorias CONMEBOL tampoco pueden atribuirse a esta fuente sin esa evidencia.
+El soporte local sigue limitado a **Premier League**. Las sondas registradas verificaron el catálogo, recursos PL y después metadatos de CL; no verificaron partidos CL ni todos los endpoints de las ocho entradas del catálogo. Copa Libertadores apareció en el catálogo, sin prueba de acceso a sus partidos. Los demás objetivos ausentes permanecen desconocidos. El plan del token no se puede inferir de esas observaciones.
 
-La [documentación de precios](https://www.football-data.org/pricing) anuncia line-ups y tarjetas en planes superiores, y el Statistic Add-On enumera córners, offsides, faltas, tiros y tarjetas. Son afirmaciones documentales: no están modeladas ni autorizadas para este entorno. El [manual](https://www.football-data.org/documentation/api) pide solicitudes inteligentes, indica 10 llamadas/minuto en Free y acepta nulos; Free anuncia resultados y horarios retrasados.
+La [documentación de precios](https://www.football-data.org/pricing) anuncia line-ups y tarjetas en planes superiores, y el Statistic Add-On enumera córners, offsides, faltas, tiros y tarjetas. Son afirmaciones documentales previamente registradas: los campos no están modelados y su autorización para este token no está verificada. El [manual](https://www.football-data.org/documentation/api) pide solicitudes inteligentes, indica 10 llamadas/minuto en Free y acepta nulos; Free anuncia resultados y horarios retrasados.
 
 ## Matriz por campo
 
@@ -48,26 +50,29 @@ La [documentación de precios](https://www.football-data.org/pricing) anuncia li
 | Resultados históricos | StatsBomb Open Data | Verificado en los archivos de la tabla | Dataset curado, no feed reciente ni SLA. |
 | Córners, tarjetas, offsides, tiros y tiros a puerta | StatsBomb eventos | Verificado donde existe evento; el calculador local ya los deriva | Eventos/campos pueden faltar; conservar semántica StatsBomb. |
 | Mismas estadísticas | football-data.org | Sólo documentación del add-on | Autorización, cobertura y forma de respuesta desconocidas. |
-| Identidad de árbitro | StatsBomb / football-data.org | Árbitro observado en metadatos públicos de World Cup 2018; la documentación de football-data muestra árbitros | No está mapeado; puede ser nulo o haber varios oficiales. |
+| Identidad de árbitro | StatsBomb / football-data.org | Discovery registró árbitro en World Cup 2018 y un elemento referees en el detalle PL | No está mapeado; puede ser nulo o haber varios oficiales. |
 | Promedio de tarjetas por árbitro | Cálculo interno futuro | Sin implementación | Requiere identidad estable, rol principal e histórico anterior al cutoff. |
-| Alineación confirmada | StatsBomb / football-data.org | Archivos \`lineups\` verificados en muestras; football-data sólo documentado | StatsBomb es histórico/postpartido; no se verificó disponibilidad preinicio en football-data. |
+| Alineación confirmada | StatsBomb / football-data.org | Archivos `lineups` registrados en muestras; lineup/bench ausentes en un detalle PL | Archivo histórico no prueba XI confirmado ni disponibilidad preinicio; frescura football-data desconocida. |
 | Alineación probable | Ninguna fuente verificada | Desconocido | No confundir con confirmada; requiere contrato y experimento explícitos. |
 
-StatsBomb exige atribución y logo al publicar análisis derivados ([términos](https://github.com/statsbomb/open-data/blob/master/README.md)). Para football-data.org hay que revisar contrato y plan vigentes antes de almacenar o redistribuir.
+Los términos previamente consultados de StatsBomb indican atribución y logo al publicar análisis derivados ([términos](https://github.com/statsbomb/open-data/blob/master/README.md)). Para football-data.org hay que revisar contrato y plan vigentes antes de almacenar o redistribuir.
 
 ## Experimento futuro de frescura de alineaciones (no implementado)
 
-1. Seleccionar seis partidos de una o dos competiciones confirmadas por una respuesta autenticada; registrar ID externo y kickoff UTC.
-2. Por respuesta conservar: \`RequestedAtUtc\`, \`ReceivedAtUtc\`, código HTTP, fingerprint, estado (\`absent/probable/confirmed/changed\`), y \`ProviderPublishedAtUtc\` si existe. \`FirstObservedAtUtc\` es propio, no publicación del proveedor.
-3. Muestrear cada 12 h desde T-72 a T-24, cada 4 h hasta T-4, cada hora hasta T-1 y cada 15 min hasta kickoff. Detener tras confirmación y observar una vez postpartido para detectar correcciones. Preferir consulta agrupada por fecha/competición.
-4. Peor caso: aproximadamente 18 observaciones por partido, 108 respuestas para seis partidos. Distribuido en el tiempo queda bajo el límite Free documentado de 10/minuto; respetar cabeceras y detener ante 429/Retry-After.
-5. No hacer polling sin aprobar endpoint, plan, T&C, retención y un modelo inmutable que preserve cada cambio.
+El diseño vigente está en [el plan de expansión](PHASE3_EXPANSION_PLAN.md#experimento-de-seis-partidos). El techo es **108 intentos de solicitud**, incluyendo setup, fallos, timeouts sin respuesta HTTP, reintentos y paginación. La asignación inicial es **12 + (6 × 16) = 108**. Se reserva inicialmente 12 para setup/contingencias y como máximo 96 para seguimiento (16 por partido, incluida una observación postpartido). Si el setup supera esa reserva, se reduce muestreo antes de emitir nuevas solicitudes; nunca se aumenta automáticamente el techo.
+
+La cadencia original de 18 observaciones por partido consumía las 108 sin espacio para setup. El plan elimina dos observaciones tempranas por partido, con menor resolución temporal. Cuotas, representación de lineups y derechos de retención requieren verificación previa. No hay autorización para iniciar polling.
 
 ## Arquitectura y siguiente paso mínimo
 
-Mantener adaptadores separados para calendario/resultados y detalle (estadísticas/alineaciones). Todos deben emitir contratos normalizados, mantener \`ProviderIdentifier\` separado del \`Guid\` interno y preservar proveedor, ID externo, fingerprint, \`ProviderPublishedAtUtc\` opcional, \`AvailableAtUtc\` e \`IngestedAtUtc\`. Las features operativas deben filtrar por ambos timestamps.
+Mantener adaptadores separados para calendario/resultados y detalle (estadísticas/alineaciones). Todos deben emitir contratos normalizados, mantener `ProviderIdentifier` separado del `Guid` interno y preservar proveedor, ID externo, fingerprint, `ProviderPublishedAtUtc` opcional, `AvailableAtUtc` e `IngestedAtUtc`. Las features operativas deben filtrar por ambos timestamps.
 
-El siguiente paso más pequeño, sujeto a aprobación, es una **sonda autenticada de sólo lectura** del catálogo y de una respuesta PL, con presupuesto acordado y sin persistencia. Debe confirmar plan, campos reales, nulos y rate-limit. Si no hay lineups probables o cobertura CONMEBOL, habrá que evaluar otro proveedor licenciado antes de diseñar migraciones.
+El siguiente paso es resolver los desconocidos y criterios de aceptación del plan. Cualquier futura verificación de proveedor requiere autorización separada y se carga al presupuesto cuando forme parte de la preparación del experimento. No repetir catálogo/PL/CL por considerar pendientes sondas ya registradas; una revalidación necesita un motivo explícito. No diseñar migraciones antes de confirmar cobertura, semántica y derechos.
+
+## Registro histórico de sondas
+
+Las secciones siguientes conservan observaciones anteriores, no resultados de nuevas solicitudes durante esta revisión.
+
 ## Sonda autenticada de football-data.org — 2026-09-25
 
 Se ejecutó una sonda de sólo lectura con el token ya configurado en el proceso. No se imprimió, almacenó ni registró el token, la cabecera de autenticación ni payloads completos. Cinco respuestas fueron HTTP 200. La quinta repitió sólo el detalle del mismo partido: un error local de variable ocurrió después de recibir la cuarta respuesta, antes de clasificar sus campos anidados. No hubo reintentos de errores HTTP, escrituras ni ingestas.
@@ -86,9 +91,9 @@ No se expuso Retry-After. Son valores puntuales, no una garantía de cuota futur
 
 El catálogo incluyó: Premier League (PL, TIER_ONE, temporada actual 2502), UEFA Champions League (CL, TIER_ONE, 2557), European Championship (EC, TIER_ONE, 1537), Ligue 1 (FL1, TIER_ONE, 2497), Bundesliga (BL1, TIER_ONE, 2522), Serie A (SA, TIER_ONE, 2494), Primera Division/La Liga (PD, TIER_ONE, 2518) y Copa Libertadores (CLI, TIER_FOUR, 2466).
 
-**Verificado por respuesta autenticada:** esas ocho entradas aparecen en el catálogo entregado al token. Esto no verifica cada endpoint de cada competición: sólo se probó individualmente PL. Europa League, Conference League, Nations League, Copa Sudamericana, Copa América y eliminatorias CONMEBOL no aparecieron como coincidencias objetivo; su disponibilidad es **desconocida**, no una prohibición definitiva.
+**Verificado por respuesta autenticada:** esas ocho entradas aparecen en el catálogo entregado al token. Esto no verifica cada endpoint de cada competición: en esta primera sonda sólo se probó individualmente PL; después se probó el recurso de competición CL, como se registra abajo. Europa League, Conference League, Nations League, Copa Sudamericana, Copa América y eliminatorias CONMEBOL no aparecieron como coincidencias objetivo; su disponibilidad es **desconocida**, no una prohibición definitiva.
 
-El detalle de competitions/PL expuso area, code, currentSeason, emblem, id, lastUpdated, name, seasons y type, con 128 temporadas. El catálogo de temporadas PL queda verificado; no se consultaron temporadas de las otras competiciones.
+El detalle de competitions/PL expuso area, code, currentSeason, emblem, id, lastUpdated, name, seasons y type, con 128 temporadas. El catálogo de temporadas PL queda verificado; en esta primera sonda no se consultaron temporadas de otras competiciones; la sonda CL posterior devolvió su catálogo de temporadas.
 
 ### Inventario de una respuesta de partido PL
 
@@ -110,7 +115,8 @@ La integración local no deserializa árbitros, estadísticas o alineaciones, au
 
 Ahora está **verificado por respuesta autenticada** que el token puede leer el catálogo, temporadas de PL y un detalle de partido PL, y que expone cabeceras de cuota. Estadísticas y lineups de planes superiores siguen **documentados pero no verificados con el token**. Alineaciones probables siguen **desconocidas**.
 
-El siguiente paso mínimo, sujeto a aprobación, es una única sonda autenticada de sólo lectura de CL o PD y, sólo si el contrato documenta un endpoint específico de lineups, una respuesta individual de ese endpoint. Debe detenerse ante 401, 403 o 429 y no persistir respuestas. No iniciar polling ni diseñar migraciones hasta confirmar contrato y cobertura.
+La propuesta intermedia de consultar CL quedó atendida por la sonda siguiente. No se identificó un endpoint independiente de lineups; el recurso candidato documentado es el detalle de partido. El plan enlazado arriba sustituye esa propuesta intermedia.
+
 ## Verificación autenticada — Champions League
 
 Se realizó exactamente una solicitud autenticada de sólo lectura a competitions/CL.
@@ -123,6 +129,6 @@ Se realizó exactamente una solicitud autenticada de sólo lectura a competition
 
 ### Lineups: endpoint oficial y restricción
 
-La [referencia oficial de Match](https://www.football-data.org/documentation/api) documenta lineup y bench dentro de homeTeam y awayTeam de la representación de **detalle de partido**. No identifica un endpoint independiente de lineups. La [página de precios](https://www.football-data.org/pricing) anuncia Line-ups & Subs desde Free + Deep Data y en planes superiores; por tanto el recurso candidato autorizado es matches/{matchId}, pero su contenido de alineaciones para este token sigue sin verificarse.
+La [referencia oficial de Match](https://www.football-data.org/documentation/api) documenta lineup y bench dentro de homeTeam y awayTeam de la representación de **detalle de partido**. No identifica un endpoint independiente de lineups. La [página de precios](https://www.football-data.org/pricing) anuncia Line-ups & Subs desde Free + Deep Data y en planes superiores; por tanto el recurso candidato documentado es matches/{matchId}, pero su contenido de alineaciones para este token sigue sin verificarse.
 
 No se llamó matches de Champions League, ni se hizo ninguna solicitud adicional. La disponibilidad temporal de alineaciones confirmadas o probables sigue siendo desconocida.

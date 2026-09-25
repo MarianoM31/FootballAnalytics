@@ -8,7 +8,7 @@ Los repositorios resuelven `Provider`, `EntityType` y `ExternalId` mediante `Pro
 
 Cada sincronización crea una fila `Running` en `IngestionRuns`, que termina como `Succeeded` con contadores o como `Failed` con un mensaje acotado y sin stack trace. La migración `002_ingestion.sql` introduce exclusivamente esta auditoría.
 
-Para agregar un proveedor futuro, implementa `IFootballDataProvider` en `FootballAnalytics.Ingestion`, transforma sus respuestas a los modelos normalizados y compón el servicio desde un punto de ejecución futuro. No uses IDs externos como claves internas, ni agregues llamadas HTTP o secretos al núcleo de Application.
+Para agregar un proveedor de calendario/resultados, implementa `IFootballDataProvider` en `FootballAnalytics.Infrastructure`, transforma sus respuestas a los modelos normalizados y compón el servicio desde un punto de ejecución futuro. No uses IDs externos como claves internas, ni agregues llamadas HTTP o secretos al núcleo de Application.
 
 La constraint `CK_Seasons_DateRange` de la migración `001` exige solamente `StartDate <= EndDate`, por lo que temporadas que cruzan años como `2026/27` son válidas. Como `001` ya está aplicada, no se modifica.
 
@@ -35,3 +35,13 @@ La migración `003_historical_match_foundation.sql` incorpora observaciones inmu
 ## StatsBomb Open Data
 
 StatsBomb Open Data puede usarse como fuente histórica mediante `sync-statsbomb-history <competitionId> <seasonId>`. Los análisis o insights publicados derivados de estos datos deben acreditar a StatsBomb y emplear su logo conforme al [Media Pack oficial](https://statsbomb.com/media-pack/). La procedencia se preserva con `Provider = statsbomb-open`.
+
+## Límites actuales y planificación Phase 3
+
+El adaptador football-data.org fija PL, expone sólo la temporada actual y mapea marcadores finales nullable; no deserializa árbitros, estadísticas ni alineaciones. Acceso observado al catálogo o al recurso de competición CL no amplía el soporte local ni acredita acceso a partidos CL.
+
+`StatsBombOpenDataProvider` implementa `IHistoricalMatchStatisticsProvider`: consulta competición/temporada, partidos y eventos, con hasta cuatro descargas de eventos concurrentes. No consulta `lineups` ni mapea árbitros; posesión queda nula. El calculador excluye tandas y valida goles de eventos contra el marcador cuando ambos marcadores están presentes. Los límites de temporada proceden de las fechas mínima/máxima de partidos devueltos y no prueban cobertura completa.
+
+El CLI usa `https://raw.githubusercontent.com/hudl/open-data/master/data/`; discovery cita `statsbomb/open-data`. Su equivalencia o redirección queda pendiente de verificación. Los recuentos y muestras parciales de discovery son evidencia fechada, no garantías actuales.
+
+El servicio histórico no recibe fecha de publicación: resuelve `AvailableAtUtc` al instante de ingesta. Los archivos históricos no demuestran disponibilidad antes del kickoff. Las propuestas de identidad de jugadores, estados y timestamps adicionales están en [PHASE3_EXPANSION_PLAN.md](PHASE3_EXPANSION_PLAN.md); no son contratos ni persistencia implementados. El plan mantiene separados los adaptadores de calendario/resultados y detalle y exige verificación y autorización antes del experimento limitado a **108 intentos de solicitud**, incluidos setup, fallos y timeouts sin respuesta HTTP, con asignación inicial **12 + (6 × 16) = 108**.
